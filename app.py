@@ -1,33 +1,52 @@
-import json
 from flask import Flask, render_template, request
-
 
 app = Flask(__name__)
 
+blogs = [
+    {"id": 1, "title": "Alisher Navoiy", "content": "Alisher Navoiy haqida post"},
+    {"id": 2, "title": "Mirzo Ulug'bek", "content": "Mirzo Ulug'bek haqida post"},
+    {"id": 3, "title": "Xudoyberdi To'xtaboyev", "content": "Xudoyberdi To'xtaboyev haqida post"}
+]
+
 @app.route("/")
-def home():
-    return render_template("index.html")
+def index():
+    search_query = request.args.get("search")
+    if search_query:
+        filtered_blogs = [blog for blog in blogs if search_query.lower() in blog["title"].lower()]
+    else:
+        filtered_blogs = blogs
+    return render_template("index.html", blogs=filtered_blogs)
 
-@app.route("/posts", methods=["GET", "POST"])
-def blogs():
-    with open("data.json") as f:
-        posts = json.loads(f.read())
+@app.route("/blogs")
+def all_blogs():
+    return render_template("blogs.html", blogs=blogs)
 
-    if request.method == 'POST':
-        title = request.form['search']
-        posts = filter(lambda post: title.lower() in post['title'].lower(), posts)
+@app.route("/blogs/<int:id>")
+def blog_detail(id):
+    blog = next((blog for blog in blogs if blog["id"] == id), None)
+    if blog:
+        return render_template("detail.html", blog=blog)
+    return "Blog topilmadi", 404
 
-    return render_template("posts.html", posts=posts)
+@app.route("/add", methods=["GET", "POST"])
+def add_blog():
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+        new_blog = {
+            "id": len(blogs) + 1,
+            "title": title,
+            "content": content
+        }
+        blogs.append(new_blog)
+        return render_template("add.html", success=True)
+    return render_template("add.html", success=False)
 
-@app.route("/posts/<int:post_id>")
-def post_detail(post_id):
-    with open("data.json") as f:
-        posts = json.loads(f.read())
-    
-    post = list(filter(lambda post: post['id'] == post_id, posts))[0]
-    
-    return render_template('detail.html', post=post)
+@app.route("/delete/<int:id>")
+def delete_blog(id):
+    global blogs
+    blogs = [blog for blog in blogs if blog["id"] != id]
+    return render_template("blogs.html", blogs=blogs)
 
-
-if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+if __name__ == "__main__":
+    app.run(debug=True)

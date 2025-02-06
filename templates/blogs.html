@@ -2,18 +2,11 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Bosh sahifa</title>
+    <title>Barcha bloglar</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Bosh sahifa</h1>
-
-    <form action="/" method="GET">
-        <input type="text" name="search" placeholder="Qidirish">
-        <button type="submit">search</button>
-    </form>
-
-    <h2>Barcha bloglar</h2>
+    <h1>Barcha bloglar</h1>
     <ul>
         {% for blog in blogs %}
             <li>
@@ -21,7 +14,7 @@
             </li>
         {% endfor %}
     </ul>
-    <br>
-    <a href="/add">Yangi blog qo'shish</a>
+
+    <a href="/">Bosh sahifa</a>
 </body>
 </html>
